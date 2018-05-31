@@ -221,10 +221,10 @@ function getParcel(posX, posY) {
     return parseInt(posX / resolution) + '-' + parseInt(posY / resolution);
 }
 
-function setValParcel(id, val) {
-    var i = id.split("-");
-    parcel[i[0]][i[1]].value += val;
-}
+//function setValParcel(id, val) {
+//    var i = id.split("-");
+//    parcel[i[0]][i[1]].value += val;
+//}
 
 /*************\
 |*LES ACTIONS*|---------------------------------------------
@@ -235,18 +235,18 @@ function setValParcel(id, val) {
 /**************************\
 |*Modifier infos parcelles*|----------------------------
 \**************************/
-function majParcel() {
-    for (allie of myUnits) {
-        var currentParcel = getParcel(allie.px, allie.py);
-        setValParcel(currentParcel, allie.forceValue);
-    }
-    for (ennemi of ennemiesUnites) {
-        var currentParcel = getParcel(ennemi.px, ennemi.py);
-        setValParcel(currentParcel, ennemi.forceValue);
-    }
-
-    parcel.map(p => printTab(p.filter(f => f.value != 0)));
-}
+//function majParcel() {
+//    for (allie of myUnits) {
+//        var currentParcel = getParcel(allie.px, allie.py);
+//        setValParcel(currentParcel, allie.forceValue);
+//    }
+//    for (ennemi of ennemiesUnites) {
+//        var currentParcel = getParcel(ennemi.px, ennemi.py);
+//        setValParcel(currentParcel, ennemi.forceValue);
+//    }
+//
+//    parcel.map(p => printTab(p.filter(f => f.value != 0)));
+//}
 
 
 
@@ -446,7 +446,7 @@ while (true) {
         myBuilds = ElemByTeam[1][0],
         myUnits = ElemByTeam[1][1],
         closestEnnemy = getNearest(myQueen, ennemiesUnites)[0];
-    majParcel();
+    //    majParcel();
     print(ActionQueen());
     print(actionBuild());
 }

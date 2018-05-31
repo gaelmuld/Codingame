@@ -2,19 +2,6 @@
 |*VARIABLES PRINCIPALES*|-------------------------------------
 \***********************/
 
-//WIDTH = 1920
-const WIDTH = 1920;
-//HEIGHT = 1000
-const HEIGHT = 1000;
-//RESOLUTION = 100
-const RESOLUTION = 100;
-//RANGEVIEW =900;
-const RANGEVIEW = 900;
-
-const nbSplitX = Math.floor(WIDTH / RESOLUTION);
-
-const nbSplitY = Math.floor(HEIGHT / RESOLUTION);
-
 //NONE = -1
 const NONE = -1;
 //FREE = -1
@@ -54,40 +41,6 @@ var ElemByTeam = [[[], []], [[], []], [[], []]]; //matrice 3 x 2 x taille de l'o
 |*LES CLASSES*|-----------------------------------------------
 \*************/
 
-function Parcelle() {
-    this.id;
-    this.parcelX;
-    this.parcelY;
-    this.px;
-    this.py;
-    this.uniteValue = 0.0;
-    this.posx0;
-    this.posy0;
-    this.posx1;
-    this.posy1;
-
-    this.pErr = function (message = '') {
-        let always = message +
-            "\nId : " + this.id +
-            "\nCoords : " + this.px + " - " + this.py +
-            "\n" + this.posx0 + " - " + this.posy0 +
-            " " + this.posx1 + " - " + this.posy0 +
-            "\n" + this.posx0 + " - " + this.posy1 +
-            " " + this.posx1 + " - " + this.posy1 +
-            "\n\nValue UNITE : " + this.uniteValue;
-        printErr(always + '\n-------------\n');
-
-    }
-    this.setVal = function () {
-        this.posx0 = RESOLUTION * this.parcelX;
-        this.posy0 = RESOLUTION * this.parcelY;
-        this.posx1 = RESOLUTION * (this.parcelX + 1);
-        this.posy1 = RESOLUTION * (this.parcelY + 1);
-        this.px = (this.posx0 + this.posx1) / 2;
-        this.py = (this.posy0 + this.posy1) / 2;
-    }
-}
-
 function Sites() {
 
     this.siteID;
@@ -105,7 +58,7 @@ function Sites() {
     this.uniteValue = 0;
 
     this.pErr = function (message = '') {
-        let always = message + "\nId : " + this.siteID + " \nPOS= " + this.px + "x " + this.py + "y" + " \nRadius= " + this.radius + "\nUnite VALUE : " + this.uniteValue + " \nStructure= " + structureType[this.structureType + 1] + " " + owner[this.owner + 1];
+        let always = message + "\nId : " + this.siteID + " \nPOS= " + this.px + "x " + this.py + "y" + " \nRadius= " + this.radius + "\ngold adn Size : " + this.gold + " - " + this.maxMineSize + " \nStructure= " + structureType[this.structureType + 1] + " " + owner[this.owner + 1];
 
         let build = "";
         let barrack = "\nNew soldier in = " + this.param1 + " \nType soldier =" + hireUnit[this.param2 + 1];
@@ -123,32 +76,6 @@ function Sites() {
     }
     this.distance = (target => distance(this, target));
 
-    this.setVal = function () {
-        let values = [0, 0]; /*[HP MAX, uniteValue]*/
-        if (this.owner == ALLIER) {
-            if (this.structureType == MINE) {
-                let mineRatio = 2 * ((this.gold + 100) / 300) + (this.maxMineSize * 0.7);
-                values = [0, mineRatio];
-            }
-            if (this.structureType == TOWER)
-                values = [this.param1, 2];
-            if (this.structureType == BARRACKS)
-                values = [0, 1];
-        }
-
-
-        if (this.owner == ENNEMI) {
-            if (this.structureType == MINE)
-                values = [0, 1];
-            if (this.structureType == TOWER)
-                values = [200, -0.25 * this.param2 / 300];
-            if (this.structureType == BARRACKS)
-                values = [0, -0.1];
-        }
-
-        this.uniteValue = Math.round(values[1] * 1000) / 1000;
-        this.uniteValue != 0 ? elemEffect.push(this) : '';
-    }
 }
 
 
@@ -170,33 +97,6 @@ function Unites() {
 
     this.distance = (target => distance(this, target));
 
-    this.setVal = function () {
-        let values = [0, 0]; /*[HP MAX, uniteValue]*/
-        if (this.owner == ALLIER) {
-            if (this.unitType == QUEEN)
-                values = [100, 0];
-            if (this.unitType == KNIGHT)
-                values = [30, 0.2];
-            if (this.unitType == ARCHER)
-                values = [45, 0.6];
-            if (this.unitType == GIANT)
-                values = [100, 0.3];
-        }
-
-        if (this.owner == ENNEMI) {
-            if (this.unitType == QUEEN)
-                values = [100, 0.2];
-            if (this.unitType == KNIGHT)
-                values = [30, -0.5];
-            if (this.unitType == ARCHER)
-                values = [45, -0.08];
-            if (this.unitType == GIANT)
-                values = [100, 0.1];
-        }
-        let Ratio = parseInt(this.health / values[0] * 100) / 100;
-        this.uniteValue = values[1] * Ratio;
-        elemEffect.push(this);
-    }
 }
 
 function Compte() {
@@ -213,16 +113,36 @@ function Compte() {
     }
 }
 
+
+/************************ *\
+|*RÉCUPÉRATION DES DONNÉES*|-------------------------------------
+\************************ */
+
+var sites = [],
+    units = [],
+    compte = [new Compte];
+
+var numSites = parseInt(readline());
+for (var i = 0; i < numSites; i++) {
+    sites[i] = new Sites;
+    var inputs = readline().split(' ');
+    sites[i].siteID = parseInt(inputs[0]);
+    sites[i].px = parseInt(inputs[1]);
+    sites[i].py = parseInt(inputs[2]);
+    sites[i].radius = parseInt(inputs[3]);
+}
+/***************\
+|*LES FONCTIONS*|-------------------------------------------
+\***************/
+
+
+
 function printTab(table, message = '') {
 
     for (let t of table) {
         t.pErr(message);
     }
 }
-
-/***************\
-|*LES FONCTIONS*|-------------------------------------------
-\***************/
 
 /**
  * calcule la distance de norme 2 sur un plan
@@ -237,9 +157,11 @@ function distance(target1, target2) {
 }
 
 function vectorAngle(origine, target, angle, length) {
+    angle = angle / 180 * Math.PI;
+    printErr('angle => ' + angle);
     var v = [(target.px - origine.px) / origine.distance(target), (target.py - origine.py) / origine.distance(target)];
     var w = [v[0] * Math.cos(angle) - v[1] * Math.sin(angle), v[0] * Math.sin(angle) + v[1] * Math.cos(angle)]
-    return [w[0] * length, w[1] * length];
+    return [Math.round(w[0] * length), Math.round(w[1] * length)];
 }
 /**
  * récupère les éléments les plus proches d'une cible selon la norme 2 sur un plan
@@ -270,10 +192,6 @@ function clears() {
     for (t of ElemByTeam) {
         t[1] = [];
     }
-
-    parcel.map(p => p.map(m => {
-        m.uniteValue = 0;
-    }));
 }
 /**
  * Déplace un élément d'un tableau à l'autre        
@@ -304,13 +222,6 @@ function getQueen(team) {
 }
 
 
-function setValParcel(item) {
-    let X = parseInt(item.px / RESOLUTION);
-    let Y = parseInt(item.py / RESOLUTION);
-
-    parcel[X][Y].uniteValue += item.uniteValue;
-}
-
 function countBarack(team, type) {
 
     return team[0].filter(x => x.param2 === type).length;
@@ -334,20 +245,15 @@ function moveElem(elem, fromArray, toArray) {
 /**************************\
 |*Modifier infos parcelles*|----------------------------
 \**************************/
-function majParcel() {
-    elemEffect.map(pE => setValParcel(pE));
-    parcel.map(m => parcelInfos = parcelInfos.concat(m.filter(parc => parc.uniteValue != 0)));
-}
+
+
 /*************\
 |*LES ACTIONS*|---------------------------------------------
 \*************/
-function setVALUES() {
 
-}
-
-//CLOSE = 300
+//CLOSE = 250
 const CLOSE = 250;
-//CLOSE = 300
+//CLOSE = 500
 const NEAR = 500;
 //MIDDLE = 750
 const MIDDLE = 750;
@@ -398,87 +304,69 @@ function ActionQueen() {
     !origineCamp ? origineCamp = getNearest(myQueen, sitesToCap)[0] : '';
 
     //TODO faire les mouvement cyclique de la reine
-    printErr("phase => " + phase + "\nturn :  " + turn + "\nnbKnightBuild : " + nbKnightBuild + "\nnbMine : " + nbMine + "\nnbTower : " + nbTower);
-    /*NOTE  algo 1
-    if (compte[0].actBuild === 0) {
-        objectif = getNearest(myQueen, sitesToCap)[0];
-        construct = 'BARRACKS-KNIGHT';
-        if (nbKnightBuild > 0 + turn)
-            compte[0].actBuild = 1;
-    }
+    printErr("\nnbKnightBuild : " + nbKnightBuild + "\nnbMine : " + nbMine + "\nnbTower : " + nbTower);
+    printTab(getNearest(myQueen, sitesToCap));
 
-    if (compte[0].actBuild === 1) {
-        objectif = getNearest(myBuilds.filter(x => x.structureType === BARRACKS)[0], sitesToCap.filter(x => x.gold > 80 || x.gold == -1))[0];
-        construct = 'MINE';
-        if (sitesToCap.filter(x => x.gold <= 80 && x.gold != -1).length) {
-            objectif = getNearest(myBuilds.filter(x => x.structureType === BARRACKS)[0], sitesToCap.filter(x => x.gold <= 80))[0];
-            construct = 'BARRACKS-KNIGHT';
-
-        }
-        if (nbMine > 2 * (1 + turn))
-            compte[0].actBuild = 2;
-    }
-
-    if (compte[0].actBuild === 2) {
-        objectif = getNearest(myBuilds.filter(x => x.structureType === BARRACKS)[0], sitesToCap)[0];
-        construct = 'TOWER';
-        if (nbTower > 3 * (1 + turn))
-            compte[0].actBuild = 3;
-    }
-
-    if (compte[0].actBuild === 3) {
-        objectif = getNearest(myQueen, myBuilds.filter(x => x.param1 < 600 && x.structureType === TOWER))[0];
-        construct = 'TOWER';
-        if (objectif === undefined || nbTower == getNearest(ennemieQueen, myBuilds.filter(x => x.param1 > 300 && x.structureType === TOWER)).length - 4 * (turn)) {
-            turn++;
-            compte[0].actBuild = 0;
-        }
-
-    }
-*/
 
     switch (phase) {
         case 0:
             objectif = getNearest(myQueen, sitesToCap)[0];
             origineCamp = objectif;
-            construct = 'BARRACKS-KNIGHT';
-            nbKnightBuild >= 1 * turn ? phase = 1 : '';
+            construct = nbKnightBuild > 1 ? 'BARRACKS-ARCHER' : 'BARRACKS-KNIGHT';
+            myBuilds.filter(x => x.structureType === BARRACKS).length >= 1 * turn ? phase = 1 : '';
             break;
         case 1:
-            if (repeat && nbMine >= 2 * turn) {
+            if (nbMine >= 2 * turn) {
                 phase = 2;
-                waitingBuild = [];
-                repeat = false;
             };
-            repeat = true;
             objectif = getNearest(origineCamp, sitesToCap.concat(myBuilds.filter(x => x.param1 < x.maxMineSize && x.structureType == MINE)))[0];
             construct = 'MINE';
             break;
         case 2:
-            if (repeat && nbTower >= 3 * turn) {
-                turn++;
-                phase = 0;
-                waitingBuild = [];
-                repeat = false;
+            if (nbTower >= 3 + turn) {
+                phase = 3;
             };
-            repeat = true;
-            objectif = getNearest(origineCamp, sitesToCap.concat(myBuilds.filter(x => x.param1 < 700 && x.structureType == TOWER)))[0];
+            objectif = getNearest(myQueen, sitesToCap.concat(myBuilds.filter(x => x.param1 < 400 && x.structureType == TOWER)))[0];
             construct = 'TOWER';
             break;
+        case 3:
+            if (nbTower < 5) {
+                turn++;
+                phase = 0;
+            }
+            objectif = getNearest(origineCamp, sitesToCap.filter(x => x.owner != ENNEMI))[0];
+            construct = 'BARRACKS-GIANT';
 
     }
 
+    var statue = getNearest(myQueen, ennemiesUnites.filter(x => x.unitType === KNIGHT && myQueen.distance(x) <= NEAR), 3);
+    printErr('count=> ' + statue.length);
+    var sPoints = getNearest(myQueen, myBuilds.filter(x => x.structureType == TOWER && x.param1 <= 100), 3);
+    if (statue.length >= 3 || myQueen.distance(ennemieQueen) <= CLOSE) {
+        if (myQueen.distance(getNearest(myQueen, sitesToCap)[0]) <= getNearest(myQueen, sitesToCap)[0].radius) {
+            objectif = getNearest(myQueen, sitesToCap)[0];
+            construct = 'TOWER';
+            printErr("m,'enfin");
+        } else if (sPoints.length > 0) {
+            var goTo = getNearest(origineCamp, sPoints)[0]
+            action = 'BUILD ' + goTo.siteID + " TOWER";
+            printErr("m,'enf1");
+            return action;
+        } else if (getNearest(myQueen, sitesToCap.filter(x => myQueen.distance(x) <= getNearest(myQueen, sitesToCap)[0].radius + 31 && x.owner === NEUTRAL)).length) {
+            var goTo = getNearest(myQueen, sitesToCap.filter(x => myQueen.distance(x) <= getNearest(myQueen, sitesToCap)[0].radius + 31 && x.owner === NEUTRAL))[0];
+            action = 'BUILD ' + goTo.siteID + " TOWER";
+            printErr("m,'enf2");
+            return action;
+        } else {
+            let go = vectorAngle(myQueen, statue[0], (90 + (180 * (Math.random()))), 80);
+            return 'MOVE ' + parseInt(((go[0] + myQueen.px) + origineCamp.px) / 2) + ' ' + parseInt(((go[1] + myQueen.py) + origineCamp.py) / 2);
+        }
+
+    }
+    /*********\
+    |*réponse*|
+    \*********/
     action = 'BUILD ' + objectif.siteID + ' ' + construct;
-
-
-    /***********\
-    |*OFFENSIVE*|
-    \***********/
-
-    /***********\
-    |*DEFENSIVE*|
-    \***********/
-
 
     return action;
 }
@@ -497,15 +385,29 @@ function actionBuild() {
     |*NORMALE*|
     \*********/
     if (compte[0].gold > 80 + compte[0].reserve && nbKnightBuild > 0) {
-        let target = getNearest(ennemieQueen, myBuilds.filter(x => x.structureType === BARRACKS))[0].siteID
+        let target = getNearest(ennemieQueen, myBuilds.filter(x => x.structureType === BARRACKS && x.param2 == KNIGHT))[0].siteID
         action += ' ' + target;
-        compte[0].reserve += 25;
+        compte[0].reserve += 20;
         return action;
     }
-    if (compte[0].gold > 80 * nbKnightBuild && nbKnightBuild > 0) {
+
+    if (compte[0].gold > 100 && myBuilds.filter(x => x.param2 === ARCHER) > 0) {
+        let target = getNearest(ennemieQueen, myBuilds.filter(x => x.structureType === BARRACKS && x.param2 == ARCHER))[0].siteID
+        action += ' ' + target;
+        return action;
+    }
+    if (compte[0].gold > 80 * nbKnightBuild && nbKnightBuild > 1) {
         compte[0].reserve = 0;
         let targets = getNearest(ennemieQueen, myBuilds.filter(x => x.structureType === BARRACKS), nbKnightBuild);
-        printTab(targets);
+        for (tar of targets) {
+
+            action += ' ' + tar.siteID;
+        }
+        return action;
+    }
+    if (compte[0].gold >= 140 && myBuilds.filter(x => x.param2 === GIANT)) {
+        compte[0].reserve = 10;
+        let targets = getNearest(ennemieQueen, myBuilds.filter(x => x.structureType === BARRACKS && x.param2 === GIANT));
         for (tar of targets) {
 
             action += ' ' + tar.siteID;
@@ -515,52 +417,8 @@ function actionBuild() {
 
 
     return action;
-
-    /***********\
-    |*OFFENSIVE*|
-    \***********/
-
-
-    /***********\
-    |*DEFENSIVE*|
-    \***********/
-
-
-
 }
 
-/************************ *\
-|*RÉCUPÉRATION DES DONNÉES*|-------------------------------------
-\************************ */
-
-var sites = [],
-    units = [],
-    compte = [new Compte],
-    parcel = [],
-    parcelInfos = [];
-
-for (let i = 0; i <= nbSplitX; i++) {
-    parcel[i] = [];
-    for (let j = 0; j <= nbSplitY; j++) {
-        parcel[i][j] = new Parcelle();
-        let p = parcel[i][j];
-        p.id = i + '-' + j;
-        p.parcelX = i;
-        p.parcelY = j;
-        p.setVal();
-    }
-}
-var numSites = parseInt(readline());
-for (var i = 0; i < numSites; i++) {
-    sites[i] = new Sites;
-    var inputs = readline().split(' ');
-    sites[i].siteID = parseInt(inputs[0]);
-    sites[i].px = parseInt(inputs[1]);
-    sites[i].parcelX = parseInt(parseInt(inputs[1]) / RESOLUTION);
-    sites[i].py = parseInt(inputs[2]);
-    sites[i].parcelY = parseInt(parseInt(inputs[2]) / RESOLUTION);
-    sites[i].radius = parseInt(inputs[3]);
-}
 // game loop
 while (true) {
 
@@ -579,7 +437,6 @@ while (true) {
         sites[i].param2 = parseInt(inputs[6]);
         switchTeamSites(sites[i], parseInt(inputs[4]));
         sites[i].owner = parseInt(inputs[4]);
-        sites[i].setVal();
     }
     clears();
     var numUnits = parseInt(readline());
@@ -587,15 +444,14 @@ while (true) {
         units[i] = new Unites;
         var inputs = readline().split(' ');
         units[i].px = parseInt(inputs[0]);
-        units[i].parcelX = parseInt(parseInt(inputs[0]) / RESOLUTION);
         units[i].py = parseInt(inputs[1]);
-        units[i].parcelY = parseInt(parseInt(inputs[1]) / RESOLUTION);
         units[i].owner = parseInt(inputs[2]);
         units[i].unitType = parseInt(inputs[3]);
         units[i].health = parseInt(inputs[4]);
         ElemByTeam[units[i].owner + 1][1].push(units[i]);
-        units[i].setVal();
     }
+
+
     /***********\
     |*affichage*|
     \***********/
@@ -610,7 +466,6 @@ while (true) {
         myUnits = ElemByTeam[1][1],
         myTeam = ElemByTeam[1];
 
-    majParcel();
     print(ActionQueen());
     print(actionBuild());
 }
